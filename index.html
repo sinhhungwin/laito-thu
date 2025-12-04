@@ -7,7 +7,15 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
         input, select, button { display: block; margin: 10px auto; padding: 10px; width: 80%; }
-        #status { margin-top: 10px; font-weight: bold; }
+        #status { margin-top: 10px; font-weight: bold; white-space: pre-line; }
+
+        .radio-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 10px auto;
+            width: 80%;
+        }
     </style>
 </head>
 <body>
@@ -27,55 +35,85 @@
     <label for="note">Ghi chú:</label>
     <input type="text" id="note" placeholder="Ghi chú (tùy chọn)">
 
-    <label for="hungBan">Em Hùng bán?</label>
-    <select id="hungBan">
-        <option value="Có">Có</option>
-        <option value="Không">Không</option>
-    </select>
+    <label>Người bán:</label>
+    <div class="radio-row">
+        <label><input type="radio" name="seller" value="E HÙNG" checked> E HÙNG</label>
+        <label><input type="radio" name="seller" value="A TÚ"> A TÚ</label>
+        <label><input type="radio" name="seller" value="A NAM"> A NAM</label>
+    </div>
 
     <button onclick="sendData()">Gửi</button>
 
     <p id="status"></p>
 
     <script>
+        function resetForm() {
+            document.getElementById("paymentMethod").selectedIndex = 0;
+            document.getElementById("amount").value = "";
+            document.getElementById("note").value = "";
+            document.querySelector('input[name="seller"][value="E HÙNG"]').checked = true;
+        }
+
         function sendData() {
-            let url = "https://script.google.com/macros/s/AKfycbwNdBVNTBTixA776Xpr0hRqGU_-trSRlQclpiuIWd1qo6rSUeWYCHTIUYVWxc_TE-FY/exec";
-            let paymentMethod = document.getElementById("paymentMethod").value;
-            let amount = document.getElementById("amount").value;
-            let note = document.getElementById("note").value;
-            let hungBan = document.getElementById("hungBan").value;
+            const paymentMethod = document.getElementById("paymentMethod").value;
+            const amount = document.getElementById("amount").value;
+            const note = document.getElementById("note").value;
+            const sellerEl = document.querySelector('input[name="seller"]:checked');
+            const statusEl = document.getElementById("status");
 
             if (!amount) {
-                document.getElementById("status").innerText = "❌ Vui lòng nhập số tiền!";
-                document.getElementById("status").style.color = "red";
+                statusEl.innerText = "❌ Vui lòng nhập số tiền!";
+                statusEl.style.color = "red";
                 return;
             }
 
-            let fullUrl = `${url}?paymentMethod=${encodeURIComponent(paymentMethod)}&amount=${encodeURIComponent(amount)}&note=${encodeURIComponent(note)}&hungBan=${encodeURIComponent(hungBan)}`;
+            const seller = sellerEl ? sellerEl.value : "(không rõ)";
+            const clipboardText =
+                `💰 THU 💰\n` + `Người bán: ${seller}\n` +
+                `Phương thức: ${paymentMethod}\n` +
+                `Số tiền: ${amount}\n` +
+                `Ghi chú: ${note || "(không)"}`;
 
-            fetch(fullUrl)
-                .then(response => response.text())
-                .then(data => {
-                    let message = `✅ Gửi thành công!\nPhương thức: ${paymentMethod}\nSố tiền: ${amount}\nGhi chú: ${note}\nEm Hùng bán? ${hungBan}`;
-                    document.getElementById("status").innerText = message;
-                    document.getElementById("status").style.color = "green";
+            // Luôn hiển thị trước cho chắc
+            statusEl.innerText =
+                `✅ Đã tạo nội dung!\n` +
+                `Phương thức: ${paymentMethod}\n` +
+                `Số tiền: ${amount}\n` +
+                `Ghi chú: ${note || "(không)"}\n` +
+                `Người bán: ${seller}`;
+            statusEl.style.color = "green";
 
-                    // Copy to clipboard
-                    let clipboardText = `💰 THU 💰\nPhương thức: ${paymentMethod}, \nSố tiền: ${amount}, \nGhi chú: ${note}, \nEm Hùng bán? ${hungBan}`;
-                    navigator.clipboard.writeText(clipboardText).then(() => {
-                        console.log("📋 Đã copy vào clipboard!");
-                    });
-
-                    // ✅ Reset form sau khi gửi
-                    document.getElementById("paymentMethod").selectedIndex = 0; // Reset dropdown
-                    document.getElementById("amount").value = ""; // Reset input
-                    document.getElementById("note").value = ""; // Reset input
-                    document.getElementById("hungBan").selectedIndex = 0; // Reset dropdown
-                })
-                .catch(error => {
-                    document.getElementById("status").innerText = "❌ Lỗi khi gửi!";
-                    document.getElementById("status").style.color = "red";
-                });
+            // Thử copy vào clipboard nếu có hỗ trợ
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(clipboardText)
+                        .then(() => {
+                            // Không cần làm gì thêm, mọi thứ đã ok
+                            resetForm();
+                        })
+                        .catch(err => {
+                            console.error("Clipboard error:", err);
+                            statusEl.innerText +=
+                                `\n⚠️ Không copy tự động được, bạn tự copy đoạn sau:\n\n${clipboardText}`;
+                            statusEl.style.color = "orange";
+                            resetForm();
+                        });
+                } else {
+                    // Trình duyệt không hỗ trợ clipboard API
+                    statusEl.innerText +=
+                        `\n⚠️ Trình duyệt không hỗ trợ copy tự động.\n` +
+                        `Bạn tự copy đoạn sau:\n\n${clipboardText}`;
+                    statusEl.style.color = "orange";
+                    resetForm();
+                }
+            } catch (err) {
+                console.error("Clipboard exception:", err);
+                statusEl.innerText +=
+                    `\n⚠️ Lỗi khi dùng clipboard.\n` +
+                    `Bạn tự copy đoạn sau:\n\n${clipboardText}`;
+                statusEl.style.color = "orange";
+                resetForm();
+            }
         }
     </script>
 </body>
