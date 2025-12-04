@@ -4,114 +4,153 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý doanh thu</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input, select, button { display: block; margin: 10px auto; padding: 10px; width: 80%; }
-        #status { margin-top: 10px; font-weight: bold; white-space: pre-line; }
-
-        .radio-row {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 10px auto;
-            width: 80%;
-        }
-    </style>
+    <!-- Link tới file CSS bên ngoài -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h2>Nhập thông tin hóa đơn</h2>
+    <div class="container">
+        <h2>Nhập thông tin hóa đơn</h2>
 
-    <label for="paymentMethod">Phương thức thanh toán:</label>
-    <select id="paymentMethod">
-        <option value="Tiền mặt">Tiền mặt</option>
-        <option value="Chuyển khoản">Chuyển khoản</option>
-        <option value="Thẻ">Thẻ</option>
-        <option value="Paypal">PayPal</option>
-    </select>
+        <!-- Loại giao dịch: Thu / Chi -->
+        <label>Loại giao dịch:</label>
+        <div class="toggle-row">
+            <div>
+                <input type="radio" id="thu" name="transactionType" value="THU" checked>
+                <label class="toggle-option thu" for="thu">THU</label>
+            </div>
+            <div>
+                <input type="radio" id="chi" name="transactionType" value="CHI">
+                <label class="toggle-option chi" for="chi">CHI</label>
+            </div>
+        </div>
 
-    <label for="amount">Số tiền:</label>
-    <input type="number" id="amount" placeholder="Nhập số tiền">
+        <!-- Phương thức thanh toán -->
+        <label for="paymentMethod">Phương thức thanh toán:</label>
+        <select id="paymentMethod">
+            <option value="Tiền mặt">Tiền mặt</option>
+            <option value="Chuyển khoản">Chuyển khoản</option>
+            <option value="Thẻ">Thẻ</option>
+            <option value="Paypal">PayPal</option>
+        </select>
 
-    <label for="note">Ghi chú:</label>
-    <input type="text" id="note" placeholder="Ghi chú (tùy chọn)">
+        <!-- Loại tiền -->
+        <label>Loại tiền:</label>
+        <div class="radio-row">
+            <label><input type="radio" name="currency" value="VND" checked> VND</label>
+            <label><input type="radio" name="currency" value="USD"> USD</label>
+            <label><input type="radio" name="currency" value="EUR"> EUR</label>
+            <label><input type="radio" name="currency" value="AUD"> AUD</label>
+        </div>
 
-    <label>Người bán:</label>
-    <div class="radio-row">
-        <label><input type="radio" name="seller" value="E HÙNG" checked> E HÙNG</label>
-        <label><input type="radio" name="seller" value="A TÚ"> A TÚ</label>
-        <label><input type="radio" name="seller" value="A NAM"> A NAM</label>
+        <!-- Số tiền -->
+        <label for="amount">Số tiền:</label>
+        <input type="number" id="amount" placeholder="Nhập số tiền">
+
+        <!-- Ghi chú -->
+        <label for="note">Ghi chú:</label>
+        <input type="text" id="note" placeholder="Ghi chú (tùy chọn)">
+
+        <!-- Người bán -->
+        <label>Người bán:</label>
+        <div class="radio-row">
+            <label><input type="radio" name="seller" value="E HÙNG" checked> E HÙNG</label>
+            <label><input type="radio" name="seller" value="A TÚ"> A TÚ</label>
+            <label><input type="radio" name="seller" value="A NAM"> A NAM</label>
+        </div>
+
+        <button onclick="sendData()">Gửi</button>
+
+        <p id="status"></p>
     </div>
-
-    <button onclick="sendData()">Gửi</button>
-
-    <p id="status"></p>
 
     <script>
         function resetForm() {
+            document.querySelector('input[name="transactionType"][value="THU"]').checked = true;
             document.getElementById("paymentMethod").selectedIndex = 0;
+            document.querySelector('input[name="currency"][value="VND"]').checked = true;
             document.getElementById("amount").value = "";
             document.getElementById("note").value = "";
             document.querySelector('input[name="seller"][value="E HÙNG"]').checked = true;
         }
 
         function sendData() {
+            const transactionType = document.querySelector('input[name="transactionType"]:checked').value;
             const paymentMethod = document.getElementById("paymentMethod").value;
             const amount = document.getElementById("amount").value;
             const note = document.getElementById("note").value;
-            const sellerEl = document.querySelector('input[name="seller"]:checked');
+            const currency = document.querySelector('input[name="currency"]:checked').value;
+            const seller = document.querySelector('input[name="seller"]:checked').value;
             const statusEl = document.getElementById("status");
 
             if (!amount) {
                 statusEl.innerText = "❌ Vui lòng nhập số tiền!";
-                statusEl.style.color = "red";
+                statusEl.style.color = "#ff8a65";
                 return;
             }
 
-            const seller = sellerEl ? sellerEl.value : "(không rõ)";
-            const clipboardText =
-                `💰 THU 💰\n` + `Người bán: ${seller}\n` +
-                `Phương thức: ${paymentMethod}\n` +
-                `Số tiền: ${amount}\n` +
-                `Ghi chú: ${note || "(không)"}`;
+            const formattedAmount =
+                currency === "VND" ? amount : `${amount} ${currency}`;
 
-            // Luôn hiển thị trước cho chắc
-            statusEl.innerText =
-                `✅ Đã tạo nội dung!\n` +
-                `Phương thức: ${paymentMethod}\n` +
-                `Số tiền: ${amount}\n` +
-                `Ghi chú: ${note || "(không)"}\n` +
-                `Người bán: ${seller}`;
-            statusEl.style.color = "green";
+            let header, clipboardText, statusText;
 
-            // Thử copy vào clipboard nếu có hỗ trợ
+            if (transactionType === "THU") {
+                // Format THU:
+                // 💰 THU 💰
+                // E HÙNG bán
+                // Phương thức: Tiền mặt
+                // Số tiền: 1000
+                // Ghi chú: gì đó
+                header = "💰 THU 💰";
+                clipboardText =
+                    `${header}\n` +
+                    `${seller} bán\n` +
+                    `Phương thức: ${paymentMethod}\n` +
+                    `Số tiền: ${formattedAmount}\n` +
+                    `Ghi chú: ${note || "(không)"}`;
+
+                statusText = clipboardText; // hiển thị giống nội dung copy
+            } else {
+                // Format CHI:
+                // 💸 CHI 💸
+                // Số tiền: 10
+                // Ghi chú: ship
+                header = "💸 CHI 💸";
+                clipboardText =
+                    `${header}\n` +
+                    `Số tiền: ${formattedAmount}\n` +
+                    `Ghi chú: ${note || "(không)"}`;
+
+                statusText = clipboardText;
+            }
+
+            statusEl.innerText = statusText;
+            statusEl.style.color = "#aed581";
+
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(clipboardText)
                         .then(() => {
-                            // Không cần làm gì thêm, mọi thứ đã ok
                             resetForm();
                         })
                         .catch(err => {
                             console.error("Clipboard error:", err);
                             statusEl.innerText +=
-                                `\n⚠️ Không copy tự động được, bạn tự copy đoạn sau:\n\n${clipboardText}`;
-                            statusEl.style.color = "orange";
+                                `\n⚠️ Không copy được, hãy tự copy:\n\n${clipboardText}`;
+                            statusEl.style.color = "#ffb74d";
                             resetForm();
                         });
+
                 } else {
-                    // Trình duyệt không hỗ trợ clipboard API
                     statusEl.innerText +=
-                        `\n⚠️ Trình duyệt không hỗ trợ copy tự động.\n` +
-                        `Bạn tự copy đoạn sau:\n\n${clipboardText}`;
-                    statusEl.style.color = "orange";
+                        `\n⚠️ Trình duyệt không hỗ trợ copy,\nHãy tự copy đoạn sau:\n\n${clipboardText}`;
+                    statusEl.style.color = "#ffb74d";
                     resetForm();
                 }
             } catch (err) {
                 console.error("Clipboard exception:", err);
                 statusEl.innerText +=
-                    `\n⚠️ Lỗi khi dùng clipboard.\n` +
-                    `Bạn tự copy đoạn sau:\n\n${clipboardText}`;
-                statusEl.style.color = "orange";
+                    `\n⚠️ Lỗi clipboard.\nTự copy đoạn sau:\n\n${clipboardText}`;
+                statusEl.style.color = "#ffb74d";
                 resetForm();
             }
         }
