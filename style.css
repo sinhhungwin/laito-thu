@@ -1,0 +1,145 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #0c0c0c;
+    color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    background: #171717;
+    border-radius: 16px;
+    padding: 20px 20px 24px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    border: 1px solid #ff9800;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #ffb74d;
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin: 10px auto 4px;
+    width: 90%;
+    font-size: 14px;
+    color: #e0e0e0;
+}
+
+select,
+input[type="number"],
+input[type="text"] {
+    display: block;
+    margin: 4px auto 10px;
+    padding: 10px;
+    width: 90%;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #111;
+    color: #f5f5f5;
+    outline: none;
+}
+
+select:focus,
+input:focus {
+    border-color: #ff9800;
+    box-shadow: 0 0 0 1px rgba(255,152,0,0.4);
+}
+
+.radio-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 6px auto 10px;
+    width: 90%;
+    font-size: 14px;
+}
+
+.radio-row label {
+    width: auto;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #e0e0e0;
+}
+
+/* Thu / Chi toggle style */
+.toggle-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 6px auto 10px;
+    width: 90%;
+}
+
+.toggle-row input[type="radio"] {
+    display: none;
+}
+
+.toggle-option {
+    flex: 1;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 999px;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 14px;
+    user-select: none;
+}
+
+.toggle-option.thu {
+    color: #81c784;
+}
+
+.toggle-option.chi {
+    color: #ff8a65;
+}
+
+.toggle-row input[type="radio"]:checked + .toggle-option {
+    border-color: #ff9800;
+    background: #262626;
+}
+
+button {
+    display: block;
+    margin: 14px auto 0;
+    padding: 10px;
+    width: 90%;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #ff9800, #ff6d00);
+    color: #111;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255,152,0,0.5);
+}
+
+button:hover {
+    filter: brightness(1.05);
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(255,152,0,0.4);
+}
+
+#status {
+    margin-top: 14px;
+    font-weight: bold;
+    white-space: pre-line;
+    font-size: 13px;
+    text-align: left;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
